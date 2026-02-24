@@ -2,6 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-skill-blue)](https://docs.anthropic.com/en/docs/claude-code)
+[![Install with npx skills](https://img.shields.io/badge/npx_skills-add-green)](https://github.com/vercel-labs/skills)
 
 Two [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skills that turn any knowledge source into an **Obsidian StudyVault** and then quiz you on it — closing the loop from content to comprehension.
 
@@ -27,6 +28,16 @@ Two [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skills that tu
 | **tutor** | `/tutor` | Interactive quiz tutor | An existing StudyVault | Quiz sessions with concept-level progress tracking |
 
 ## Quick Start
+
+### One-line install (recommended)
+
+```bash
+npx skills add RoundTable02/tutor-skills
+```
+
+> Requires [npx skills](https://github.com/vercel-labs/skills) — works with Claude Code, Cursor, Windsurf, and more.
+
+### Manual install
 
 ```bash
 git clone https://github.com/RoundTable02/tutor-skills.git
