@@ -1,11 +1,12 @@
 ---
 name: tutor-setup
 description: >
-  Transforms knowledge sources into an Obsidian StudyVault. Two modes:
+  Transforms knowledge sources into an Obsidian StudyVault. Three modes:
   (1) Document Mode — PDF/text/web sources → study notes with practice questions.
   (2) Codebase Mode — source code project → onboarding vault for new developers.
-  Mode is auto-detected based on project markers in CWD.
-argument-hint: "[source-path-or-url]"
+  (3) Curriculum Mode — subject/grade input → structured learning vault from curriculum standards.
+  Mode is auto-detected based on project markers and user input in CWD.
+argument-hint: "[source-path-or-url OR subject description e.g. '초등3학년 수학']"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, WebFetch
 ---
 
@@ -21,13 +22,157 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash, WebFetch
 
 On invocation, detect mode automatically:
 
-1. **Check for project markers** in CWD:
+1. **Check user argument** for curriculum keywords:
+   - Grade/level indicators: `초등`, `중등`, `고등`, `elementary`, `middle`, `high`, `grade`, `학년`
+   - Subject indicators: `수학`, `영어`, `국어`, `과학`, `사회`, `math`, `english`, `science`, `phonics`, `파닉스`
+   - If argument matches curriculum pattern → **Curriculum Mode**
+2. **Check for project markers** in CWD:
    - `package.json`, `pom.xml`, `build.gradle`, `Cargo.toml`, `go.mod`, `Makefile`,
      `*.sln`, `pyproject.toml`, `setup.py`, `Gemfile`
-2. **If any marker found** → **Codebase Mode**
-3. **If no marker found** → **Document Mode**
-4. **Tie-break**: If `.git/` is the sole indicator and no source code files (`*.ts`, `*.py`, `*.java`, `*.go`, `*.rs`, etc.) exist, default to Document Mode.
-5. Announce detected mode and ask user to confirm or override.
+3. **If any project marker found** → **Codebase Mode**
+4. **Check for document files** in CWD:
+   - `*.pdf`, `*.txt`, `*.md`, `*.html`, `*.epub`
+   - If found → **Document Mode**
+5. **If no files and no markers** → **Curriculum Mode** (ask user for subject/grade)
+6. **Tie-break**: If `.git/` is the sole indicator and no source code files exist, default to Document Mode.
+7. Announce detected mode and ask user to confirm or override.
+
+---
+
+## Curriculum Mode
+
+> Generates a structured StudyVault from curriculum standards — no source files needed.
+> The user provides a subject and grade level (e.g., "초등 3학년 수학", "elementary phonics").
+> AI generates learning objectives, concept explanations, examples, and practice questions.
+> Templates: [curriculum-templates.md](references/curriculum-templates.md)
+
+### Phase K1: Curriculum Specification
+
+1. **Parse user input** to extract:
+   - `subject`: 과목 (수학, 영어, 국어, 과학, etc.)
+   - `grade`: 학년/레벨 (초등 1~6, 중등 1~3, etc.)
+   - `scope`: 범위 (전체 학년 or 특정 단원)
+2. **Confirm with user** using AskUserQuestion:
+   - Show parsed subject, grade, scope
+   - Ask if they want full curriculum or specific units
+   - Ask target learner age (for language level calibration)
+3. **Determine language level**:
+   - 초등 1-2: 매우 쉬운 말, 짧은 문장, 그림 설명 위주
+   - 초등 3-4: 쉬운 말, 예시 많이, 단계별 설명
+   - 초등 5-6: 또래 수준 용어, 개념 설명 + 예시
+   - 중등: 교과서 수준 용어, 개념 + 원리 설명
+   - 고등: 정식 용어, 심화 개념
+
+### Phase K2: Curriculum Structure Generation
+
+1. **Generate curriculum outline** based on national curriculum standards:
+   - Unit list with learning objectives per unit
+   - Prerequisite dependencies between units
+   - Estimated difficulty per unit (1-5 scale)
+2. **Save as `curriculum.json`** in CWD:
+   ```json
+   {
+     "subject": "수학",
+     "grade": "초등 3학년",
+     "language_level": "쉬운 말, 예시 많이, 단계별 설명",
+     "units": [
+       {
+         "id": "unit-01",
+         "name": "세 자리 수의 덧셈과 뺄셈",
+         "objectives": [
+           "세 자리 수의 덧셈을 할 수 있다",
+           "받아올림이 있는 덧셈을 이해한다",
+           "세 자리 수의 뺄셈을 할 수 있다",
+           "뺄셈의 검산을 할 수 있다"
+         ],
+         "prerequisites": [],
+         "difficulty": 1
+       }
+     ]
+   }
+   ```
+3. **Present to user** for confirmation/modification before proceeding.
+
+### Phase K3: Tag Standard
+
+Define tag vocabulary:
+- **Format**: English, lowercase, kebab-case
+- **Hierarchy**: `#subject` → `#unit-name` → `#objective` → `#question-type`
+- **Example**: `#math`, `#addition`, `#carry-over`, `#recall`
+- **Registry**: Only registered tags allowed.
+
+### Phase K4: Vault Structure
+
+Create `StudyVault/` with curriculum-oriented structure:
+
+```
+StudyVault/
+  00-Dashboard/              # Learning map + progress tracker
+  01-<Unit1-Name>/           # Per-unit folder
+    concept.md               # Concept explanation (age-appropriate)
+    examples.md              # Worked examples with step-by-step
+    practice.md              # Practice questions (8+ per unit)
+  02-<Unit2-Name>/
+    ...
+  curriculum.json            # Curriculum definition (machine-readable)
+```
+
+### Phase K5: Dashboard Creation
+
+Create `00-Dashboard/` per [curriculum-templates.md](references/curriculum-templates.md):
+
+- **Learning Map**: Unit list with objectives, prerequisites, status
+- **Progress Tracker**: Links to each unit's concept/practice files
+- **Study Path**: Recommended order based on prerequisites
+- **Quick Reference**: Key formulas/rules per unit with `→ [[Concept Note]]` links
+
+### Phase K6: Concept Notes
+
+Per [curriculum-templates.md](references/curriculum-templates.md). Key rules:
+- YAML frontmatter: `unit`, `grade`, `subject`, `keywords` (MANDATORY)
+- **Age-appropriate language**: Match `language_level` from K1
+- **Structure per concept note**:
+  1. "What are we learning?" — 1-2 sentence intro
+  2. "Let's understand step by step" — broken into small steps
+  3. Overview table for key points
+  4. Visual aids: ASCII diagrams, number lines, tables
+  5. "Common mistakes" section with `> [!warning]` callouts
+  6. `## Related Notes` with `[[wiki-links]]`
+
+### Phase K7: Worked Examples
+
+Per unit, create `examples.md`:
+- **3-5 worked examples** per learning objective
+- Each example shows **full step-by-step solution**
+- Difficulty progression: easy → medium → challenging
+- Use `> [!tip]` callouts for key insights
+- Include "Try it yourself" prompts between examples
+
+### Phase K8: Practice Questions
+
+Per [curriculum-templates.md](references/curriculum-templates.md). Key rules:
+- **8+ questions per unit** covering all objectives
+- **Active recall**: answers use `> [!answer]- 정답 보기` fold callout
+- **Question type diversity**:
+  - Recall (basic): 40% — "352 + 214 = ?"
+  - Application: 30% — "민수는 사탕 245개, 영희는 132개. 합하면?"
+  - Analysis: 20% — "왜 이 답이 틀렸는지 설명해보세요"
+  - Challenge: 10% — harder problems for advanced learners
+- **Difficulty markers**: Easy / Medium / Hard per question
+- Hints available via `> [!hint]-` fold callouts
+- `## Related Concepts` with `[[wiki-links]]`
+
+### Phase K9: Interlinking
+
+1. `## Related Notes` on every concept note
+2. Learning Map links to every concept + practice note
+3. Cross-link concept ↔ examples ↔ practice
+4. Prerequisites linked: "Before this, review [[Previous Unit]]"
+5. Quick Reference → `[[Concept Note]]` links
+
+### Phase K10: Self-Review (MANDATORY)
+
+Verify against [quality-checklist.md](references/quality-checklist.md) **Curriculum Mode** section. Fix and re-verify until all checks pass.
 
 ---
 
@@ -147,4 +292,5 @@ See [codebase-workflow.md](references/codebase-workflow.md) for detailed per-pha
 ## Language
 
 - Match source material language (Korean → Korean notes, etc.)
+- **Curriculum Mode**: Match user's language; default to Korean for Korean curriculum
 - **Tags/keywords**: ALWAYS English

@@ -4,6 +4,74 @@ Before reporting completion, verify every item in the relevant mode's section. F
 
 ---
 
+## Curriculum Mode
+
+### Curriculum Definition
+- [ ] `curriculum.json` exists and is valid JSON
+- [ ] Every unit has: id, name, objectives (1+), prerequisites, difficulty
+- [ ] Prerequisites form a valid DAG (no circular dependencies)
+- [ ] Language level matches target grade/age
+- [ ] User confirmed curriculum structure before content generation
+
+### Coverage
+- [ ] Every unit in `curriculum.json` has a folder in StudyVault
+- [ ] Every unit folder contains: concept.md, examples.md, practice.md
+- [ ] Every learning objective is covered in concept notes
+- [ ] No unit missing or incomplete
+
+### Age-Appropriate Language
+- [ ] Language complexity matches `language_level` in curriculum.json
+- [ ] Sentences are short and clear for target age
+- [ ] Concrete examples precede abstract rules
+- [ ] Real-world scenarios use age-appropriate contexts
+- [ ] No jargon without explanation for younger learners
+
+### Concept Notes
+- [ ] Every concept note has YAML frontmatter: `unit`, `grade`, `subject`, `keywords`
+- [ ] "What are we learning?" intro section present
+- [ ] Step-by-step explanation with numbered steps
+- [ ] Key Points table present
+- [ ] At least one visual aid (ASCII diagram, number line, table)
+- [ ] "Common Mistakes" section with `> [!warning]` callouts
+- [ ] `## Related Notes` with `[[wiki-links]]`
+
+### Worked Examples
+- [ ] 3-5 worked examples per unit
+- [ ] Difficulty progression: easy → medium → hard
+- [ ] Full step-by-step solution for each example
+- [ ] "Try It Yourself" section with fold answers
+- [ ] `> [!tip]` callouts for key insights
+
+### Practice Questions
+- [ ] 8+ questions per unit
+- [ ] All answers use `> [!answer]- 정답 보기` fold — never immediately visible
+- [ ] Hints available via `> [!hint]-` fold callouts
+- [ ] `> [!summary]-` pattern summary at end
+- [ ] Question type diversity: ~40% recall, ~30% application, ~20% analysis, ~10% challenge
+- [ ] Difficulty markers on every question: [Easy] / [Medium] / [Hard]
+- [ ] `## Related Concepts` with `[[wiki-links]]`
+
+### Dashboard
+- [ ] Learning Map: unit list with objectives, prerequisites, status, links
+- [ ] Study Path shows recommended learning order
+- [ ] Quick Reference: key formulas/rules per unit with `→ [[Note]]` links
+- [ ] Tag Index with hierarchy rules
+- [ ] Progress Summary section
+
+### Interlinking
+- [ ] Every concept note has `## Related Notes`
+- [ ] `[[wiki-links]]` for all cross-references
+- [ ] concept ↔ examples ↔ practice cross-linked within each unit
+- [ ] Prerequisites linked: "Before this, review [[Previous Unit]]"
+- [ ] Learning Map links to every concept + examples + practice
+
+### CWD Boundary
+- [ ] All output within CWD/StudyVault/
+- [ ] No absolute file paths in notes or frontmatter
+- [ ] curriculum.json saved in StudyVault root
+
+---
+
 ## Document Mode
 
 ### Source Traceability
